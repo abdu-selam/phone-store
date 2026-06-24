@@ -16,6 +16,14 @@ const userSchema = new Schema(
       required: true,
     },
     wishlist: [],
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    emailVerify: {
+      token: String,
+      createdAt: Date,
+    },
   },
   {
     timestamps: true,
