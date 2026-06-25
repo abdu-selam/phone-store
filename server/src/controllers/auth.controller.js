@@ -58,6 +58,46 @@ const register = async (req, res) => {
   }
 };
 
+const verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.params.token;
+    if (!token) return res.status(400).json({ error: "Token missed" });
+
+    const user = await User.findOne({ "emailVerify.token": token });
+
+    if (!user) return res.status(409).json({ error: "Invalid Token" });
+
+    if (user.isVerified)
+      return res.status(200).json({
+        message: "Email Verified",
+      });
+
+    const diff = Date.now() - user.emailVerify.createdAt;
+
+    if (diff > 1000 * 60 * 30) {
+      user.emailVerify.token = null;
+      user.emailVerify.createdAt = null;
+
+      await user.save();
+
+      return res.status(409).json({ error: "Token Expired" });
+    }
+
+    user.isVerified = true;
+    await user.save();
+
+    res.status(200).json({
+      message: "Email Verified",
+    });
+  } catch (error) {
+    console.log("Error on verifyEmail controller (auth.controller)", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
   register,
+  verifyEmail,
 };
