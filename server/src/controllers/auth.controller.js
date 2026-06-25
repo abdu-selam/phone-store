@@ -3,21 +3,11 @@ const { v4: uuid } = require("uuid");
 
 const { emailValidate, passwordValidate } = require("../utils/validate");
 const User = require("../models/user.model");
+const { verifyTemplate } = require("../utils/emailTemplate");
+const { sendEmail } = require("../utils/email");
 
 const register = async (req, res) => {
   try {
-    /*
-        1. recieve inputs
-            . name 
-            . email 
-            . password (6 in length, should have numbers, letters in both cases)
-        2. validation
-        3. encrypt password
-        4. generate user object allong side confirmation token
-        5. save user
-        6. send email
-        7. send verification
-    */
     const { name, email, password } = req.body || {};
     if (!name || !email || !password)
       return res.status(400).json({ error: "All fields required" });
@@ -45,7 +35,12 @@ const register = async (req, res) => {
     });
 
     await newUser.save();
-    // TODO -> send email
+    const { text, html, subject } = verifyTemplate(
+      newUser.name,
+      newUser.emailVerify.token,
+    );
+
+    await sendEmail({ to: newUser.email, subject, html, text });
 
     res.status(201).json({
       message: "User created verify your email.",
