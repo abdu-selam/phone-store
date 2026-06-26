@@ -67,7 +67,7 @@ const register = async (req, res) => {
 
 const verifyEmail = async (req, res) => {
   try {
-    const { token } = req.params.token;
+    const { token } = req.params;
     if (!token) return res.status(400).json({ error: "Token missed" });
 
     const user = await User.findOne({ "emailVerify.token": token });
@@ -91,6 +91,10 @@ const verifyEmail = async (req, res) => {
     }
 
     user.isVerified = true;
+    user.emailVerify = {
+      token: null,
+      createdAt: null,
+    };
     await user.save();
 
     res.status(200).json({
@@ -198,6 +202,11 @@ const forgotPassword = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: "Invalid Cridentials" });
 
+    if (!user.isVerified)
+      return res.status(401).json({
+        error: "Verify your email first",
+      });
+
     user.forgotPassword = {
       token: uuid(),
       createdAt: Date.now(),
@@ -259,6 +268,8 @@ const resetPassword = async (req, res) => {
       createdAt: null,
     };
 
+    user.refresh = [];
+
     await user.save();
 
     res.status(200).json({
@@ -313,7 +324,7 @@ const logout = async (req, res) => {
       (item) => item.token !== refresh,
     );
 
-    await req.user;
+    await req.user.save();
 
     res.clearCookie("access");
     res.clearCookie("refresh");
@@ -394,7 +405,7 @@ const refresh = async (req, res) => {
     await user.save();
 
     accessCookie(res, access);
-    refreshCookie(res, refresh);
+    refreshCookie(res, refreshToken);
 
     res.status(200).json({
       message: "Token refreshed",
