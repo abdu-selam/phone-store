@@ -99,6 +99,46 @@ const verifyEmail = async (req, res) => {
   }
 };
 
+const resendVerifyEmail = async (req, res) => {
+  try {
+    const { email } = req.body || {};
+    if (!email) return res.status(400).json({ error: "Invalid Cridentials" });
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ error: "Invalid Cridentials" });
+
+    if (user.isVerified)
+      return res.status(200).json({
+        message: "Email verified",
+      });
+
+    user.emailVerify = {
+      token: uuid(),
+      createdAt: Date.now(),
+    };
+
+    await user.save();
+    const { text, html, subject } = verifyTemplate(
+      user.name,
+      user.emailVerify.token,
+    );
+
+    await sendEmail({ to: user.email, subject, html, text });
+
+    res.status(200).json({
+      message: "Verification email has been sent",
+    });
+  } catch (error) {
+    console.log(
+      "Error on resendVerifyEmail controller (auth.controller) ",
+      error,
+    );
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
+
 const login = async (req, res) => {
   try {
     const { email, password } = req.body || {};
@@ -148,5 +188,6 @@ const login = async (req, res) => {
 module.exports = {
   register,
   verifyEmail,
+  resendVerifyEmail,
   login,
 };
