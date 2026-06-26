@@ -9,6 +9,7 @@ const {
   resendForgotEmail,
   logout,
   me,
+  refresh,
 } = require("../controllers/auth.controller");
 const { protectedRoute } = require("../middlewares/auth.middleware");
 
@@ -28,5 +29,7 @@ route.post("/resend-forgot", resendForgotEmail);
 route.delete("/logout", protectedRoute, logout);
 
 route.get("/me", protectedRoute, me);
+
+route.get("/refresh", refresh);
 
 module.exports = route;

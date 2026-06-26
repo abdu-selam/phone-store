@@ -348,6 +348,65 @@ const me = async (req, res) => {
   }
 };
 
+const refresh = async (req, res) => {
+  try {
+    const { refresh } = req.cookies || {};
+
+    if (!refresh) {
+      return res.status(401).json({
+        error: "Refresh token missing",
+      });
+    }
+
+    const result = verifyRefreshToken(refresh);
+    if (!result.success)
+      return res.status(401).json({
+        error: "Refresh token missing",
+      });
+
+    const user = await User.findById(result.payload.id);
+
+    if (!user)
+      return res.status(404).json({
+        error: "User not found",
+      });
+
+    const tokenExists = user.refresh.some((item) => item.token === refresh);
+
+    if (!tokenExists)
+      return res.status(401).json({
+        error: "Invalid refresh token",
+      });
+
+    const access = signAccessToken({
+      id: user._id,
+      email: user.email,
+    });
+
+    const refreshToken = signRefreshToken({
+      id: user._id,
+      email: user.email,
+    });
+
+    user.refresh = user.refresh.filter((item) => item.token !== refresh);
+    user.refresh.push({ token: refreshToken, createdAt: Date.now() });
+
+    await user.save();
+
+    accessCookie(res, access);
+    refreshCookie(res, refresh);
+
+    res.status(200).json({
+      message: "Token refreshed",
+    });
+  } catch (error) {
+    console.log("Error in refresh controller (auth.controller) ", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
   register,
   verifyEmail,
@@ -358,4 +417,5 @@ module.exports = {
   resendForgotEmail,
   logout,
   me,
+  refresh,
 };
