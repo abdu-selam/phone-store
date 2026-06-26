@@ -218,10 +218,60 @@ const forgotPassword = async (req, res) => {
   }
 };
 
+const resetPassword = async (req, res) => {
+  try {
+    const { email, password, token } = req.body || {};
+
+    if (!email || !password || !token)
+      return res.status(400).json({
+        error: "Invalid Cridentials",
+      });
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ error: "Invalid Cridentials" });
+
+    if (user.forgotPassword.token !== token)
+      return res.status(400).json({ error: "Invalid Cridentials" });
+
+    if (Date.now() - user.forgotPassword.createdAt > 1000 * 60 * 5) {
+      user.forgotPassword = {
+        token: null,
+        createdAt: null,
+      };
+      await user.save();
+      return res.status(401).json({ error: "Token expired" });
+    }
+
+    if (!passwordValidate(password))
+      return res.status(400).json({ error: "Invalid password type" });
+
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
+
+    user.password = hash;
+    user.forgotPassword = {
+      token: null,
+      createdAt: null,
+    };
+
+    await user.save();
+
+    res.status(200).json({
+      message: "password has been reseted.",
+    });
+  } catch (error) {
+    console.log("Error on resetPassword controller (auth.controller) ", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
   register,
   verifyEmail,
   resendVerifyEmail,
   login,
   forgotPassword,
+  resetPassword,
 };
