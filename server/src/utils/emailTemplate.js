@@ -29,6 +29,33 @@ const verifyTemplate = (name, token) => {
   };
 };
 
+const forgotTemplate = (name, token) => {
+  const text = `
+  Hello ${name}, 
+  We received a request to reset the password for your account. Click the link below to create a new password and regain access to your account. If you did not request a password reset, you can safely ignore this email and no changes will be made to your account.
+  ${CLIENT_URL}/auth/forgot/${token}
+
+  For your security, this password reset link will expire in 5 minutes. Do not share this link with anyone. Our team will never ask for your password or this reset link.
+  `;
+
+  const html = htmlEmailCreator(
+    "We received a request to reset the password for your account. Click the button below to create a new password and regain access to your account. If you did not request a password reset, you can safely ignore this email and no changes will be made to your account.",
+    name,
+    token,
+    "Forgot Password Email",
+    "auth/forgot",
+    "For your security, this password reset link will expirein 5 minutes. Do not share this link with anyone. Our team will never ask for your password or this reset link.",
+  );
+
+  const subject = "Password Reset Mail";
+
+  return {
+    text,
+    html,
+    subject,
+  };
+};
+
 const htmlEmailCreator = (text, name, token, title, path, caution) => {
   const html = `<!doctype html>
 <html lang="en">
@@ -210,4 +237,5 @@ const htmlEmailCreator = (text, name, token, title, path, caution) => {
 
 module.exports = {
   verifyTemplate,
+  forgotTemplate,
 };

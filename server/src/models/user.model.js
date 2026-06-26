@@ -33,6 +33,10 @@ const userSchema = new Schema(
         },
       },
     ],
+    forgotPassword: {
+      token: String,
+      createdAt: Date,
+    },
   },
   {
     timestamps: true,

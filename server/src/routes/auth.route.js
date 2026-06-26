@@ -4,6 +4,7 @@ const {
   verifyEmail,
   login,
   resendVerifyEmail,
+  forgotPassword,
 } = require("../controllers/auth.controller");
 
 const route = Router();
@@ -14,5 +15,7 @@ route.post("/verify-email/:token", verifyEmail);
 route.post("/resend-verify", resendVerifyEmail);
 
 route.post("/login", login);
+
+route.post("/forgot-password", forgotPassword);
 
 module.exports = route;
