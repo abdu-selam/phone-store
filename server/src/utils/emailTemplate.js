@@ -57,7 +57,7 @@ const forgotTemplate = (name, token) => {
 };
 
 const htmlEmailCreator = (text, name, token, title, path, caution) => {
-  const html = `<!doctype html>
+  return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
