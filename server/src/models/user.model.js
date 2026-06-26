@@ -15,7 +15,7 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
-    wishlist: [],
+    wishlist: [String],
     isVerified: {
       type: Boolean,
       default: false,
@@ -24,12 +24,21 @@ const userSchema = new Schema(
       token: String,
       createdAt: Date,
     },
+    refresh: [
+      {
+        token: String,
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   {
     timestamps: true,
   },
 );
 
-const User = model(userSchema, "User");
+const User = model("User", userSchema);
 
 module.exports = User;

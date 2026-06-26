@@ -5,6 +5,8 @@ const { emailValidate, passwordValidate } = require("../utils/validate");
 const User = require("../models/user.model");
 const { verifyTemplate } = require("../utils/emailTemplate");
 const { sendEmail } = require("../utils/email");
+const { signAccessToken, signRefreshToken } = require("../utils/jwt");
+const { accessCookie, refreshCookie } = require("../utils/cookie");
 
 const register = async (req, res) => {
   try {
@@ -97,7 +99,54 @@ const verifyEmail = async (req, res) => {
   }
 };
 
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body || {};
+    if (!email || !password)
+      return res.status(400).json({ error: "Invalid Cridentials" });
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ error: "Invalid Cridentials" });
+
+    const passCheck = await bcrypt.compare(password, user.password);
+    if (!passCheck)
+      return res.status(400).json({ error: "Invalid Cridentials" });
+
+    if (!user.isVerified)
+      return res.status(401).json({
+        error: "Verify Your email",
+      });
+
+    const access = signAccessToken({
+      id: user._id,
+      email: user.email,
+    });
+
+    const refresh = signRefreshToken({
+      id: user._id,
+      email: user.email,
+    });
+
+    user.refresh.push({ token: refresh, createdAt: Date.now() });
+
+    await user.save();
+
+    accessCookie(res, access);
+    refreshCookie(res, refresh);
+
+    res.status(200).json({
+      message: "User loged in successfully",
+    });
+  } catch (error) {
+    console.log("Error on login controller (auth.controller)", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
   register,
   verifyEmail,
+  login,
 };
