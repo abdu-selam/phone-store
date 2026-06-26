@@ -6,6 +6,7 @@ const {
   resendVerifyEmail,
   forgotPassword,
   resetPassword,
+  resendForgotEmail,
 } = require("../controllers/auth.controller");
 
 const route = Router();
@@ -19,5 +20,6 @@ route.post("/login", login);
 
 route.post("/forgot-password", forgotPassword);
 route.post("/reset-password", resetPassword);
+route.post("/resend-forgot", resendForgotEmail);
 
 module.exports = route;

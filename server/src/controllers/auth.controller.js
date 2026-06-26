@@ -267,6 +267,39 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const resendForgotEmail = async (req, res) => {
+  try {
+    const { email } = req.body || {};
+    if (!email) return res.status(400).json({ error: "Invalid Cridentials" });
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ error: "Invalid Cridentials" });
+
+    user.forgotPassword = {
+      token: uuid(),
+      createdAt: Date.now(),
+    };
+
+    await user.save();
+
+    const { text, html, subject } = forgotTemplate(
+      user.name,
+      user.forgotPassword.token,
+    );
+
+    await sendEmail({ to: user.email, subject, html, text });
+
+    res.status(200).json({
+      message: "Reset password email has been sent.",
+    });
+  } catch (error) {
+    console.log("Error on resendForgotEmail (auth.controller) ", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
   register,
   verifyEmail,
@@ -274,4 +307,5 @@ module.exports = {
   login,
   forgotPassword,
   resetPassword,
+  resendForgotEmail,
 };
