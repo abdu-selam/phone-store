@@ -300,6 +300,28 @@ const resendForgotEmail = async (req, res) => {
   }
 };
 
+const logout = async (req, res) => {
+  try {
+    const { refresh } = req.cookies || {};
+
+    req.user.refresh = req.user.refresh.filter(
+      (item) => item.token !== refresh,
+    );
+
+    await req.user;
+
+    res.clearCookie("access");
+    res.clearCookie("refresh");
+
+    res.status(204).json({});
+  } catch (error) {
+    console.log("Error on logout controller (auth.controller) ", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
   register,
   verifyEmail,
@@ -308,4 +330,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   resendForgotEmail,
+  logout,
 };

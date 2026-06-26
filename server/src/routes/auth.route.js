@@ -7,7 +7,9 @@ const {
   forgotPassword,
   resetPassword,
   resendForgotEmail,
+  logout,
 } = require("../controllers/auth.controller");
+const { protectedRoute } = require("../middlewares/auth.middleware");
 
 const route = Router();
 
@@ -21,5 +23,7 @@ route.post("/login", login);
 route.post("/forgot-password", forgotPassword);
 route.post("/reset-password", resetPassword);
 route.post("/resend-forgot", resendForgotEmail);
+
+route.delete("/logout", protectedRoute, logout);
 
 module.exports = route;

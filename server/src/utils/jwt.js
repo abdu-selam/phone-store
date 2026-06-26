@@ -10,9 +10,18 @@ const signAccessToken = (payload) => {
 };
 
 const verifyAccessToken = (token) => {
-  if (!token) throw new Error("Token is required");
+  if (!token) return { success: false, type: "missed" };
+  try {
+    const payload = jwt.verify(token, JWT_ACCESS);
 
-  return jwt.verify(token, JWT_ACCESS);
+    return { success: true, payload };
+  } catch (error) {
+    if (error.name === "TokenExpiredError")
+      return { success: false, type: "exp" };
+
+    if (error.name === "JsonWebTokenError")
+      return { success: false, type: "invalid" };
+  }
 };
 
 const signRefreshToken = (payload) => {
@@ -24,9 +33,18 @@ const signRefreshToken = (payload) => {
 };
 
 const verifyRefreshToken = (token) => {
-  if (!token) throw new Error("Token is required");
+  if (!token) return { success: false, type: "missed" };
+  try {
+    const payload = jwt.verify(token, JWT_REFRESH);
 
-  return jwt.verify(token, JWT_REFRESH);
+    return { success: true, payload };
+  } catch (error) {
+    if (error.name === "TokenExpiredError")
+      return { success: false, type: "exp" };
+
+    if (error.name === "JsonWebTokenError")
+      return { success: false, type: "invalid" };
+  }
 };
 
 module.exports = {

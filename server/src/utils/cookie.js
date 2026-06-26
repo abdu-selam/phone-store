@@ -14,7 +14,7 @@ const refreshCookie = (res, token) => {
     httpOnly: true,
     secure: NODE_ENV === "production",
     sameSite: NODE_ENV === "production" ? "none" : lax,
-    path: "/auth/refresh",
+    path: ["/api/auth/refresh", "/api/auth/logout"],
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
