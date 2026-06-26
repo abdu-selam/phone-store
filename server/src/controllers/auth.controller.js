@@ -5,7 +5,12 @@ const { emailValidate, passwordValidate } = require("../utils/validate");
 const User = require("../models/user.model");
 const { verifyTemplate, forgotTemplate } = require("../utils/emailTemplate");
 const { sendEmail } = require("../utils/email");
-const { signAccessToken, signRefreshToken } = require("../utils/jwt");
+const {
+  signAccessToken,
+  signRefreshToken,
+  verifyRefreshToken,
+  verifyAccessToken,
+} = require("../utils/jwt");
 const { accessCookie, refreshCookie } = require("../utils/cookie");
 
 const register = async (req, res) => {
@@ -322,6 +327,27 @@ const logout = async (req, res) => {
   }
 };
 
+const me = async (req, res) => {
+  try {
+    const user = req.user.toObject();
+
+    delete user.password;
+    delete user.isVerified;
+    delete user.emailVerify;
+    delete user.refresh;
+    delete user.forgotPassword;
+
+    res.status(200).json({
+      user,
+    });
+  } catch (error) {
+    console.log("Error on me cotroller (auth.controller) ", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
   register,
   verifyEmail,
@@ -331,4 +357,5 @@ module.exports = {
   resetPassword,
   resendForgotEmail,
   logout,
+  me,
 };
