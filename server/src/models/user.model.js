@@ -15,7 +15,18 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
-    wishlist: [String],
+    wishlist: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Mobile",
+      },
+    ],
+    bought: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Mobile",
+      },
+    ],
     isVerified: {
       type: Boolean,
       default: false,

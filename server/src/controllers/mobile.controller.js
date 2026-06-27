@@ -1,0 +1,43 @@
+const Mobile = require("../models/mobile.model");
+const {
+  extractFilter,
+  mobileQuery,
+  availabileFilters,
+} = require("../services/mobile.services");
+
+// get all phones with filter and pagenation
+const getAll = async (req, res) => {
+  try {
+    // extract filters
+    const result = extractFilter(req);
+    // extract products and availabile filters
+    const [{ count, mobiles }, filters] = await Promise.all([
+      mobileQuery(result),
+      availabileFilters(),
+    ]);
+
+    // send result
+    res.status(200).json({
+      message: "Success",
+      pages: {
+        total: Math.ceil(count / 25),
+        current: result.page,
+      },
+      mobiles,
+      filters,
+      count,
+    });
+  } catch (error) {
+    console.log("Error on getAll controller (mobile.controller) ", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
+// get one phone
+// post phone
+// update phone
+
+module.exports = {
+  getAll,
+};

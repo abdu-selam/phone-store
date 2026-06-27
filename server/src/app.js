@@ -2,8 +2,9 @@ const cookieParser = require("cookie-parser");
 const express = require("express");
 const cors = require("cors");
 
-const authRoute = require("./routes/auth.route");
 const { CLIENT_URL } = require("./utils/env");
+const authRoute = require("./routes/auth.route");
+const mobileRoute = require("./routes/mobile.route");
 
 const app = express();
 
@@ -17,5 +18,6 @@ app.use(
 );
 
 app.use("/api/auth", authRoute);
+app.use("/api/mobile", mobileRoute);
 
 module.exports = app;
