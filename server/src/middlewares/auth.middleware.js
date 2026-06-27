@@ -1,16 +1,10 @@
-const User = require("../models/user.model");
-const { verifyAccessToken } = require("../utils/jwt");
+const { protectedService } = require("../services/auth.service");
 
 const protectedRoute = async (req, res, next) => {
   try {
-    const { access } = req.cookies || {};
-    if (!access)
-      return res.status(400).json({
-        error: "Token Missed",
-      });
+    const result = await protectedService(req);
 
-    const result = verifyAccessToken(access);
-    if (!result.success) {
+    if (!result.status) {
       if (result.type === "exp")
         return res.status(403).json({
           error: "Expired Token",
@@ -27,13 +21,7 @@ const protectedRoute = async (req, res, next) => {
         });
     }
 
-    const user = await User.findById(result.payload.id);
-    if (!user)
-      return res.status(401).json({
-        error: "Invalid Token",
-      });
-
-    req.user = user;
+    req.user = result.user;
     next();
   } catch (error) {
     console.log("Error on protectedRoute middleware (auth.middeware) ", error);

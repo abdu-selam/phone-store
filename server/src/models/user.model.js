@@ -48,6 +48,11 @@ const userSchema = new Schema(
       token: String,
       createdAt: Date,
     },
+    roll: {
+      type: String,
+      enum: ["admin", "user"],
+      default: "user",
+    },
   },
   {
     timestamps: true,
