@@ -50,6 +50,10 @@ const adminRoute = async (req, res, next) => {
         return res.status(400).json({
           error: "Token Missed",
         });
+
+      return res.status(400).json({
+        error: "Token Missed",
+      });
     }
 
     const user = result.user;

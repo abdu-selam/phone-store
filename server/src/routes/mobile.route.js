@@ -15,19 +15,17 @@ route.get("/:id", getOne);
 route.post(
   "/",
   adminRoute,
-  upload.fields(
-    [
-      {
-        name: "main",
-        maxCount: 1,
-      },
-      {
-        name: "gallary",
-        maxCount: 15,
-      },
-    ],
-    createPhone,
-  ),
+  upload.fields([
+    {
+      name: "main",
+      maxCount: 1,
+    },
+    {
+      name: "gallary",
+      maxCount: 15,
+    },
+  ]),
+  createPhone,
 );
 
 module.exports = route;

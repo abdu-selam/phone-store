@@ -2,30 +2,45 @@ const { uploadPromise, deleteFile } = require("../services/cloudinary.service");
 
 // extract all inputs and validate
 const phoneInputExtract = (req) => {
-  const { name, description, brand, os, storage, ram, camera, battery, price } =
-    req.body || {};
+  const {
+    name,
+    description,
+    brand,
+    osname,
+    osdetail,
+    storage,
+    ram,
+    cameramain,
+    camerafront,
+    batterycapacity,
+    batterycharging,
+    price,
+  } = req.body || {};
 
   if (
-    !name ||
-    !description ||
-    !brand ||
-    !os?.name ||
-    !os?.detail ||
-    !storage ||
-    !ram ||
-    !camera?.front ||
-    !camera?.main ||
-    !battery?.capacity ||
-    !battery?.charging ||
+    !name || // *
+    !description || // *
+    !brand || // *
+    !osname || // *
+    !osdetail || // *
+    !storage || // *
+    !ram || // *
+    !camerafront || // *
+    !cameramain || // *
+    !batterycapacity || // *
+    !batterycharging || // *
     !price
   ) {
     return {
       status: false,
-      error: "All fields required",
+      error: {
+        msg: "All fields required ",
+        data: req.body,
+      },
     };
   }
 
-  if (!["Android", "ios", "other"].includes(os.name))
+  if (!["Android", "ios", "other"].includes(osname))
     return {
       status: false,
       error: "Invalid os type",
@@ -46,20 +61,20 @@ const phoneInputExtract = (req) => {
       description,
       brand,
       os: {
-        name: os.name,
-        detail: os.detail,
+        name: osname,
+        detail: osdetail,
       },
       memory: {
         storage,
         ram,
       },
       camera: {
-        main: camera.main,
-        selfie: camera.front,
+        main: cameramain,
+        selfie: camerafront,
       },
       battery: {
-        capacity: battery.capacity,
-        charging: battery.charging,
+        capacity: batterycapacity,
+        charging: batterycharging,
       },
       price: priceNum,
     },
@@ -94,9 +109,10 @@ const uploadMultiple = async (files) => {
   const gallary = files.gallary;
 
   const mainResult = await uploader(main);
-  const gallaryResult = await Promise.all([
-    ...gallary.map((file) => uploader(file)),
-  ]);
+  const gallaryResult =
+    gallary?.length > 0
+      ? await Promise.all([...gallary.map((file) => uploader(file))])
+      : [];
 
   return {
     main: mainResult,

@@ -82,10 +82,13 @@ const createPhone = async (req, res) => {
     // process the image
     const { main, gallary } = await uploadMultiple(req.files);
     mobile.pictures = {
-      gallary: gallary.map((img) => ({
-        url: img.data.secure_url,
-        publicId: img.data.public_id,
-      })),
+      gallary:
+        gallary.length > 0
+          ? gallary.map((img) => ({
+              url: img.data.secure_url,
+              publicId: img.data.public_id,
+            }))
+          : null,
       main: main.status
         ? {
             url: main.data.secure_url,

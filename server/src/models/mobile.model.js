@@ -41,7 +41,7 @@ const mobileSchema = new Schema(
     },
     battery: {
       capacity: String,
-      charging: Sring,
+      charging: String,
     },
     price: {
       type: Number,
