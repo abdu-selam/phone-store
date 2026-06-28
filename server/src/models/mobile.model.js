@@ -53,8 +53,16 @@ const mobileSchema = new Schema(
       default: "available",
     },
     pictures: {
-      main: String,
-      all: [String],
+      main: {
+        url: String,
+        publicId: String,
+      },
+      gallary: [
+        {
+          url: String,
+          publicId: String,
+        },
+      ],
     },
   },
   { timestamps: true },

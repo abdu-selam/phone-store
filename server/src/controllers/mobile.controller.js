@@ -5,6 +5,7 @@ const {
   mobileQuery,
   availabileFilters,
 } = require("../services/mobile.services");
+const { phoneInputExtract, uploadMultiple } = require("../utils/phoneCreate");
 
 // get all phones with filter and pagenation
 const getAll = async (req, res) => {
@@ -63,10 +64,59 @@ const getOne = async (req, res) => {
     });
   }
 };
+
 // post phone
+const createPhone = async (req, res) => {
+  try {
+    // recieve all inputs
+    const result = phoneInputExtract(req);
+    if (!result.status)
+      return res.status(400).json({
+        error: result.error,
+      });
+
+    const mobile = new Mobile({
+      ...result.data,
+    });
+
+    // process the image
+    const { main, gallary } = await uploadMultiple(req.files);
+    mobile.pictures = {
+      gallary: gallary.map((img) => ({
+        url: img.data.secure_url,
+        publicId: img.data.public_id,
+      })),
+      main: main.status
+        ? {
+            url: main.data.secure_url,
+            publicId: main.data.public_id,
+          }
+        : gallary.length > 0
+          ? {
+              url: gallary[0].data.secure_url,
+              publicId: gallary[0].data.public_id,
+            }
+          : null,
+    };
+
+    // save the product
+    await mobile.save();
+
+    res.status(201).json({
+      messge: "Phone Created Successfully",
+      data: mobile.toObject(),
+    });
+  } catch (error) {
+    console.log("Error on createPhone controller (mobile.controller) ", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
 // update phone
 
 module.exports = {
   getAll,
   getOne,
+  createPhone,
 };
