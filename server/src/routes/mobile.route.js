@@ -3,6 +3,7 @@ const {
   getAll,
   getOne,
   createPhone,
+  updatePhone,
 } = require("../controllers/mobile.controller");
 const { adminRoute } = require("../middlewares/auth.middleware");
 const { upload } = require("../middlewares/multer.middleware");
@@ -27,5 +28,6 @@ route.post(
   ]),
   createPhone,
 );
+route.put("/:id", adminRoute, updatePhone);
 
 module.exports = route;

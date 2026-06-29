@@ -18,25 +18,22 @@ const phoneInputExtract = (req) => {
   } = req.body || {};
 
   if (
-    !name || // *
-    !description || // *
-    !brand || // *
-    !osname || // *
-    !osdetail || // *
-    !storage || // *
-    !ram || // *
-    !camerafront || // *
-    !cameramain || // *
-    !batterycapacity || // *
-    !batterycharging || // *
+    !name ||
+    !description ||
+    !brand ||
+    !osname ||
+    !osdetail ||
+    !storage ||
+    !ram ||
+    !camerafront ||
+    !cameramain ||
+    !batterycapacity ||
+    !batterycharging ||
     !price
   ) {
     return {
       status: false,
-      error: {
-        msg: "All fields required ",
-        data: req.body,
-      },
+      error: "All fields required ",
     };
   }
 
@@ -120,8 +117,72 @@ const uploadMultiple = async (files) => {
   };
 };
 
+// extract input for update phone
+const updateMobile = (req, mobile) => {
+  const {
+    name,
+    description,
+    brand,
+    osname,
+    osdetail,
+    storage,
+    ram,
+    cameramain,
+    camerafront,
+    batterycapacity,
+    batterycharging,
+    price,
+  } = req.body || {};
+
+  if (
+    !name &&
+    !description &&
+    !brand &&
+    !osname &&
+    !osdetail &&
+    !storage &&
+    !ram &&
+    !camerafront &&
+    !cameramain &&
+    !batterycapacity &&
+    !batterycharging &&
+    !price
+  ) {
+    return {
+      status: false,
+      error: "Nothing To Update",
+    };
+  }
+
+  mobile.name = name ? name : mobile.name;
+  mobile.description = description ? description : mobile.description;
+  mobile.brand = brand ? brand : mobile.brand;
+  mobile.os.detail = osdetail ? osdetail : mobile.os.detail;
+  mobile.memory.storage = storage ? storage : mobile.memory.storage;
+  mobile.memory.ram = ram ? ram : mobile.memory.ram;
+  mobile.camera.main = cameramain ? cameramain : mobile.camera.main;
+  mobile.camera.selfie = camerafront ? camerafront : mobile.camera.selfie;
+  mobile.battery.capacity = batterycapacity
+    ? batterycapacity
+    : mobile.battery.capacity;
+  mobile.battery.charging = batterycharging
+    ? batterycharging
+    : mobile.battery.charging;
+
+  if (["Android", "ios", "other"].includes(osname)) mobile.os.name = osname;
+
+  const priceNum = Number(price);
+
+  if (Number.isNaN(priceNum) || priceNum <= 0) mobile.price = priceNum;
+
+  return {
+    status: true,
+  };
+};
+
 module.exports = {
   phoneInputExtract,
   uploader,
   uploadMultiple,
+  updateMobile,
 };

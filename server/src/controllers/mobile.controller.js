@@ -5,7 +5,11 @@ const {
   mobileQuery,
   availabileFilters,
 } = require("../services/mobile.services");
-const { phoneInputExtract, uploadMultiple } = require("../utils/phoneCreate");
+const {
+  phoneInputExtract,
+  uploadMultiple,
+  updateMobile,
+} = require("../utils/phoneCreate");
 
 // get all phones with filter and pagenation
 const getAll = async (req, res) => {
@@ -116,10 +120,52 @@ const createPhone = async (req, res) => {
     });
   }
 };
+
 // update phone
+const updatePhone = async (req, res) => {
+  try {
+    // check mobile id
+    const { id } = req.params || {};
+    if (!id)
+      return res.status(401).json({
+        error: "Invalid Mobile Id",
+      });
+
+    const mobile = await Mobile.findById(id);
+    if (!mobile)
+      return res.status(401).json({
+        error: "Invalid Mobile Id",
+      });
+
+    // check inputs
+    const result = updateMobile(req, mobile);
+    if (!result.status)
+      return res.status(401).json({
+        error: result.error,
+      });
+
+    // save mobile
+    await mobile.save();
+    // send responce
+    res.status(200).json({
+      message: "Mobile has been Updated",
+      data: mobile.toObject(),
+    });
+  } catch (error) {
+    console.log("Error on update Phone controller (mobile.controller) ", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
+
+// add wishlist
+// remove wishlist
+// get wishlists
 
 module.exports = {
   getAll,
   getOne,
   createPhone,
+  updatePhone,
 };
