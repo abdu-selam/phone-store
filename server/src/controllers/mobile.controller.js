@@ -160,6 +160,33 @@ const updatePhone = async (req, res) => {
 };
 
 // add wishlist
+const addWishList = async (req, res) => {
+  try {
+    const { id } = req.params || {};
+    if (!id)
+      return res.status(401).json({
+        error: "Invalid Mobile Id",
+      });
+
+    const mobile = await Mobile.findById(id);
+    if (!mobile)
+      return res.status(401).json({
+        error: "Invalid Mobile Id",
+      });
+
+    req.user.wishlist = [...new Set([...req.user.wishlist, mobile._id])];
+    await req.user.save();
+    res.status(200).json({
+      message: "Mobile has been added to wishlist",
+      data: req.user.wishlist,
+    });
+  } catch (error) {
+    console.log("Error on addWishList controller (mobile.controller) ", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
 // remove wishlist
 // get wishlists
 
@@ -168,4 +195,5 @@ module.exports = {
   getOne,
   createPhone,
   updatePhone,
+  addWishList,
 };

@@ -4,8 +4,12 @@ const {
   getOne,
   createPhone,
   updatePhone,
+  addWishList,
 } = require("../controllers/mobile.controller");
-const { adminRoute } = require("../middlewares/auth.middleware");
+const {
+  adminRoute,
+  protectedRoute,
+} = require("../middlewares/auth.middleware");
 const { upload } = require("../middlewares/multer.middleware");
 
 const route = Router();
@@ -29,5 +33,7 @@ route.post(
   createPhone,
 );
 route.put("/:id", adminRoute, updatePhone);
+
+route.post("/wish/:id", protectedRoute, addWishList);
 
 module.exports = route;
