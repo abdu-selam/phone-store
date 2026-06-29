@@ -216,7 +216,10 @@ const removeWishlist = async (req, res) => {
       data: req.user.wishlist,
     });
   } catch (error) {
-    console.log("Error on removeWishlist (mobile.controller) ", error);
+    console.log(
+      "Error on removeWishlist controller (mobile.controller) ",
+      error,
+    );
     res.status(500).json({
       error: "Internal Server Error",
     });
@@ -224,6 +227,35 @@ const removeWishlist = async (req, res) => {
 };
 
 // get wishlists
+const getMyWishlist = async (req, res) => {
+  try {
+    // fetch wishlist
+    const wishs = req.user.wishlist;
+    const mobiles = await Mobile.find({
+      id: { $in: wishs },
+    });
+
+    // check available wishlist
+    req.user.wishlist = mobiles.map((item) => item._id);
+
+    // if changed resave the user
+    await req.user.save();
+
+    // send wishs
+    res.status(200).json({
+      message: "wishelist has been sent",
+      data: req.user.wishlist,
+    });
+  } catch (error) {
+    console.log(
+      "Error on getMyWishlist controller (mobile.controller) ",
+      error,
+    );
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
 
 module.exports = {
   getAll,
@@ -232,4 +264,5 @@ module.exports = {
   updatePhone,
   addWishList,
   removeWishlist,
+  getMyWishlist,
 };
