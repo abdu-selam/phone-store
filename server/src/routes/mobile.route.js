@@ -5,6 +5,7 @@ const {
   createPhone,
   updatePhone,
   addWishList,
+  removeWishlist,
 } = require("../controllers/mobile.controller");
 const {
   adminRoute,
@@ -35,5 +36,6 @@ route.post(
 route.put("/:id", adminRoute, updatePhone);
 
 route.post("/wish/:id", protectedRoute, addWishList);
+route.delete("/wish/:id", protectedRoute, removeWishlist);
 
 module.exports = route;

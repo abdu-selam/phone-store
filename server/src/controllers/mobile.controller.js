@@ -187,7 +187,42 @@ const addWishList = async (req, res) => {
     });
   }
 };
+
 // remove wishlist
+const removeWishlist = async (req, res) => {
+  try {
+    // check mobile id
+    const { id } = req.params || {};
+    if (!id)
+      return res.status(401).json({
+        error: "Invalid Mobile Id",
+      });
+
+    const mobile = await Mobile.findById(id);
+    if (!mobile)
+      return res.status(401).json({
+        error: "Invalid Mobile Id",
+      });
+
+    // filter id
+    req.user.wishlist = req.user.wishlist.filter((item) => item !== id);
+
+    // save user
+    await req.user.save();
+
+    // send response
+    res.status(200).json({
+      message: "Mobile has been removed from wishlist",
+      data: req.user.wishlist,
+    });
+  } catch (error) {
+    console.log("Error on removeWishlist (mobile.controller) ", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
+
 // get wishlists
 
 module.exports = {
@@ -196,4 +231,5 @@ module.exports = {
   createPhone,
   updatePhone,
   addWishList,
+  removeWishlist,
 };
