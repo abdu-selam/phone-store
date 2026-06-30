@@ -1,5 +1,6 @@
 const Message = require("../models/message.model");
 const User = require("../models/user.model");
+const { messageFilter } = require("../services/message.service");
 
 const sendMessage = async (req, res) => {
   try {
@@ -29,6 +30,7 @@ const sendMessage = async (req, res) => {
 
     res.status(201).json({
       message: "Message has been sent",
+      data: { ...msg.toObject(), type: "sent" },
     });
   } catch (error) {
     console.log("Error on sendMessage controller (message.controller) ", error);
@@ -38,6 +40,31 @@ const sendMessage = async (req, res) => {
   }
 };
 
+const getMessages = async (req, res) => {
+  try {
+    const messages = await Message.find({
+      $or: [{ sender: req.user._id }, { reciever: req.user._id }],
+    })
+      .sort({ createdAt: -1 })
+      .populate([
+        { path: "sender", select: "name roll" },
+        { path: "receiver", select: "name roll" },
+      ])
+      .lean();
+    const filtered = messageFilter(messages);
+
+    res.status(200).json({
+      nessage: filtered,
+    });
+  } catch (error) {
+    console.log("Error on getMessages controller (message.controller) ", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
   sendMessage,
+  getMessages,
 };
