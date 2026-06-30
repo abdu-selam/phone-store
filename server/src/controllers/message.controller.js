@@ -64,7 +64,57 @@ const getMessages = async (req, res) => {
   }
 };
 
+const getSingleMessage = async (req, res) => {
+  try {
+    const other = req?.params?.id;
+    if (!other)
+      return res.status(401).json({
+        error: "Id required",
+      });
+
+    const user = await User.findById(other);
+    if (!user)
+      return res.status(401).json({
+        error: "Invalid Id",
+      });
+
+    const message = await Message.find({
+      $and: [
+        {
+          sender: {
+            $in: [user._id, req.user._id],
+          },
+        },
+        {
+          reciever: {
+            $in: [user._id, req.user._id],
+          },
+        },
+      ],
+    })
+      .populate([
+        { path: "sender", select: "name roll" },
+        { path: "receiver", select: "name roll" },
+      ])
+      .sort({ createdAt: 1 })
+      .lean();
+
+    res.status(200).json({
+      message,
+    });
+  } catch (error) {
+    console.log(
+      "Error on getSingleMessage controller (message.controller) ",
+      error,
+    );
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
   sendMessage,
   getMessages,
+  getSingleMessage,
 };
