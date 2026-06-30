@@ -6,6 +6,7 @@ const multer = require("multer");
 const { CLIENT_URL } = require("./utils/env");
 const authRoute = require("./routes/auth.route");
 const mobileRoute = require("./routes/mobile.route");
+const messageRoute = require("./routes/message.route");
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use(
 
 app.use("/api/auth", authRoute);
 app.use("/api/mobile", mobileRoute);
+app.use("/api/message", messageRoute);
 
 app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
