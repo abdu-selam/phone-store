@@ -119,7 +119,36 @@ const orderCallback = async (req, res) => {
   }
 };
 
+const deliverOrder = async (req, res) => {
+  try {
+    const { id } = req.params || {};
+    if (!id)
+      return res.status(400).json({
+        error: "Order id required",
+      });
+
+    const order = await Order.findById(id);
+    if (!order)
+      return res.status(400).json({
+        error: "Order id required",
+      });
+
+    order.status = "delivered";
+    await order.save();
+
+    res.status(200).json({
+      message: "Order delivered",
+    });
+  } catch (error) {
+    console.log("Error on deliverOrder controller (order.controller) ", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
   createOrder,
   orderCallback,
+  deliverOrder,
 };
