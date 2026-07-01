@@ -163,7 +163,7 @@ const getOrders = async (req, res) => {
       ordersPromise = Order.find({ status: { $in: ["delivered", "paid"] } });
     }
 
-    const orders = await ordersPromise.lean();
+    const orders = await ordersPromise.select("price status tx_ref _id").lean();
 
     res.status(200).json({
       message: orders,
@@ -176,9 +176,32 @@ const getOrders = async (req, res) => {
   }
 };
 
+const getMyOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({
+      $and: [
+        { userId: req.user._id },
+        { status: { $in: ["paid", "delivered"] } },
+      ],
+    })
+      .select("price status tx_ref _id")
+      .lean();
+
+    res.status(200).json({
+      message: orders,
+    });
+  } catch (error) {
+    console.log("Error on getMyOrders controller (order.controller) ", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
   createOrder,
   orderCallback,
   deliverOrder,
   getOrders,
+  getMyOrders,
 };

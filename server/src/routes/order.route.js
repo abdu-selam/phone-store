@@ -4,8 +4,12 @@ const {
   orderCallback,
   deliverOrder,
   getOrders,
+  getMyOrders,
 } = require("../controllers/order.controller");
-const { adminRoute } = require("../middlewares/auth.middleware");
+const {
+  adminRoute,
+  protectedRoute,
+} = require("../middlewares/auth.middleware");
 
 const route = Router();
 
@@ -13,6 +17,7 @@ route.post("/", createOrder);
 route.post("/verify", orderCallback);
 route.put("/:id", adminRoute, deliverOrder);
 
-route.get("/", adminRoute, getOrders)
+route.get("/", adminRoute, getOrders);
+route.get("/my", protectedRoute, getMyOrders);
 
 module.exports = route;
