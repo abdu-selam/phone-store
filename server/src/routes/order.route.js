@@ -5,6 +5,7 @@ const {
   deliverOrder,
   getOrders,
   getMyOrders,
+  getOrderDetail,
 } = require("../controllers/order.controller");
 const {
   adminRoute,
@@ -19,5 +20,6 @@ route.put("/:id", adminRoute, deliverOrder);
 
 route.get("/", adminRoute, getOrders);
 route.get("/my", protectedRoute, getMyOrders);
+route.get("/:id", getOrderDetail);
 
 module.exports = route;

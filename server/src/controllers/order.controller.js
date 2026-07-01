@@ -198,10 +198,44 @@ const getMyOrders = async (req, res) => {
   }
 };
 
+const getOrderDetail = async (req, res) => {
+  try {
+    const { id } = req.params || {};
+
+    if (!id)
+      return res.status(400).json({
+        error: "Order id required",
+      });
+
+    const order = await Order.findById(id)
+      .populate([
+        { path: "products", select: "name brand price pictures.main _id" },
+      ])
+      .lean();
+    if (!order)
+      return res.status(400).json({
+        error: "Order id required",
+      });
+
+    res.status(200).json({
+      message: order,
+    });
+  } catch (error) {
+    console.log(
+      "Error on getOrderDetail controller (order.controller) ",
+      error,
+    );
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
   createOrder,
   orderCallback,
   deliverOrder,
   getOrders,
   getMyOrders,
+  getOrderDetail,
 };
