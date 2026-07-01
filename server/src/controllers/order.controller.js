@@ -1,5 +1,6 @@
 const Mobile = require("../models/mobile.model");
 const Order = require("../models/order.model");
+const { protectedService } = require("../services/auth.service");
 const {
   inputExtracter,
   orderInitializer,
@@ -18,6 +19,8 @@ const createOrder = async (req, res) => {
       return res.status(400).json({
         error: "Invalid Products Structure",
       });
+
+    const isAuthUser = await protectedService(req);
 
     const mobiles = await Mobile.find({
       _id: {
@@ -81,6 +84,7 @@ const createOrder = async (req, res) => {
         .filter((item) => item.status === "available")
         .map((item) => item._id),
       price: amount,
+      userId: isAuthUser.status ? isAuthUser.user._id : null,
     });
 
     // save order
@@ -147,8 +151,34 @@ const deliverOrder = async (req, res) => {
   }
 };
 
+const getOrders = async (req, res) => {
+  try {
+    const { type } = req.query || {};
+    let ordersPromise;
+    if (type === "delivered") {
+      ordersPromise = Order.find({ status: "delivered" });
+    } else if (type === "paid") {
+      ordersPromise = Order.find({ status: "paid" });
+    } else {
+      ordersPromise = Order.find({ status: { $in: ["delivered", "paid"] } });
+    }
+
+    const orders = await ordersPromise.lean();
+
+    res.status(200).json({
+      message: orders,
+    });
+  } catch (error) {
+    console.log("Error on getOrders controller (order.controller) ", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
   createOrder,
   orderCallback,
   deliverOrder,
+  getOrders,
 };
