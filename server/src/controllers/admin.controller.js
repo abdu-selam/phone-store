@@ -17,6 +17,32 @@ const getUsers = async (req, res) => {
   }
 };
 
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params || {};
+
+    if (!id)
+      return res.status(400).json({
+        error: "User id required",
+      });
+
+    const user = await User.findById(id);
+    if (!user)
+      return res.status(400).json({
+        error: "User id required",
+      });
+
+    await user.deleteOne();
+    res.status(204).json({});
+  } catch (error) {
+    console.log("Error on deleteUser controller (admin.controller) ", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
   getUsers,
+  deleteUser,
 };
