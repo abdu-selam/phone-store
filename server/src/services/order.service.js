@@ -1,6 +1,7 @@
 const chapa = require("../configs/chapa.config");
+const Order = require("../models/order.model");
 const { SERVER_URL, CLIENT_URL } = require("../utils/env");
-const { emailValidate } = require("../utils/validate");
+const { emailValidate, genTxRef } = require("../utils/validate");
 
 const inputExtracter = (req) => {
   const { first_name, last_name, email, phone_number } = req.body || {};
@@ -32,13 +33,14 @@ const inputExtracter = (req) => {
 };
 
 const orderInitializer = async (data) => {
-  const tx_ref = await chapa.genTxRef();
+  const tx_refs = await Order.distinct("tx_ref").lean();
+  const tx_ref = genTxRef(tx_refs);
 
   const chapaRes = await chapa.initialize({
     ...data,
     currency: "ETB",
     tx_ref: tx_ref,
-    callback_url: `${SERVER_URL}/api/verify`,
+    callback_url: `${SERVER_URL}/api/order/verify`,
     return_url: `${CLIENT_URL}/mobiles/order`,
     customization: {
       title: "Abdu Phone Store",
@@ -52,7 +54,16 @@ const orderInitializer = async (data) => {
   };
 };
 
+const verifyPayment = async (tx_ref) => {
+  const verify = await chapa.verify({
+    tx_ref,
+  });
+
+  return verify;
+};
+
 module.exports = {
   inputExtracter,
   orderInitializer,
+  verifyPayment,
 };

@@ -19,6 +19,7 @@ const orderSchema = new Schema(
     tx_ref: {
       type: String,
       required: true,
+      unique: true,
     },
     products: [
       {

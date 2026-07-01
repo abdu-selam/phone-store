@@ -3,6 +3,7 @@ const Order = require("../models/order.model");
 const {
   inputExtracter,
   orderInitializer,
+  verifyPayment,
 } = require("../services/order.service");
 
 const createOrder = async (req, res) => {
@@ -96,6 +97,29 @@ const createOrder = async (req, res) => {
   }
 };
 
+const orderCallback = async (req, res) => {
+  try {
+    const { trx_ref, ref_id, status } = req.body;
+    if (status === "failed") {
+      const order = await Order.findOneAndDelete({ tx_ref: trx_ref });
+      return;
+    }
+
+    const verify = await verifyPayment(trx_ref);
+    if (verify.status === "failed") return;
+
+    const order = await Order.findOne({ tx_ref: trx_ref });
+    order.status = "paid";
+    await order.save();
+  } catch (error) {
+    console.log("Error on orderCallback controller (order.controller) ", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
   createOrder,
+  orderCallback,
 };
