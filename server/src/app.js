@@ -8,6 +8,7 @@ const authRoute = require("./routes/auth.route");
 const mobileRoute = require("./routes/mobile.route");
 const messageRoute = require("./routes/message.route");
 const orderRoute = require("./routes/order.route");
+const adminRoute = require("./routes/admin.route");
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use("/api/auth", authRoute);
 app.use("/api/mobile", mobileRoute);
 app.use("/api/message", messageRoute);
 app.use("/api/order", orderRoute);
+app.use("/api/admin", adminRoute);
 
 app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
