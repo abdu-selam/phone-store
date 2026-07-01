@@ -25,6 +25,7 @@ const orderSchema = new Schema(
       required: true,
       unique: true,
     },
+    ref_id: String,
     products: [
       {
         type: Schema.Types.ObjectId,

@@ -114,6 +114,7 @@ const orderCallback = async (req, res) => {
 
     const order = await Order.findOne({ tx_ref: trx_ref });
     order.status = "paid";
+    order.ref_id = ref_id;
     await order.save();
   } catch (error) {
     console.log("Error on orderCallback controller (order.controller) ", error);
@@ -163,7 +164,9 @@ const getOrders = async (req, res) => {
       ordersPromise = Order.find({ status: { $in: ["delivered", "paid"] } });
     }
 
-    const orders = await ordersPromise.select("price status tx_ref _id").lean();
+    const orders = await ordersPromise
+      .select("price status tx_ref _id ref_id")
+      .lean();
 
     res.status(200).json({
       message: orders,
@@ -184,7 +187,7 @@ const getMyOrders = async (req, res) => {
         { status: { $in: ["paid", "delivered"] } },
       ],
     })
-      .select("price status tx_ref _id")
+      .select("price status tx_ref _id ref_id")
       .lean();
 
     res.status(200).json({
