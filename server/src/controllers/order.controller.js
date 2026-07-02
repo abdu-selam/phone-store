@@ -26,26 +26,24 @@ const createOrder = async (req, res) => {
       _id: {
         $in: [...products],
       },
-    })
-      .select("_id name status price description")
-      .lean();
+    }).select("_id name status price description");
 
     if (mobiles.length === 0)
       return res.status(400).json({
         error: "Invalid Products Ids",
       });
 
-    const validIds = mobiles.map((item) => item._id);
+    const selectedIds = mobiles.map((item) => item._id);
 
     const invalids = products
       .filter(
         (item, i) =>
-          !validIds.includes(item) ||
-          mobiles[validIds.indexOf(item)].status === "sold",
+          !selectedIds.includes(item) ||
+          mobiles[selectedIds.indexOf(item)].status !== "available",
       )
       .map((item) => ({
         id: item,
-        reason: !validIds.includes(item) ? "Invalid" : "sold",
+        reason: !selectedIds.includes(item) ? "Invalid" : "sold",
       }));
 
     // accept inputs and validate
@@ -54,6 +52,10 @@ const createOrder = async (req, res) => {
       return res.status(400).json({
         error: result.error,
       });
+
+    const validIds = mobiles
+      .filter((item) => item.status === "available")
+      .map((item) => item._id);
 
     const amount = mobiles
       .filter((item) => item.status === "available")
@@ -89,9 +91,18 @@ const createOrder = async (req, res) => {
 
     // save order
     await order.save();
+    mobiles.forEach(async (mobile) => {
+      if (mobile.status === "available") {
+        mobile.status = "pending";
+        await mobile.save();
+      }
+    });
+
     // send url to client
     res.status(201).json({
       message: chapa.res.data.checkout_url,
+      valids: validIds,
+      invalids: invalids,
     });
   } catch (error) {
     console.log("Error on createOrder controller (order.controller) ", error);
@@ -105,7 +116,20 @@ const orderCallback = async (req, res) => {
   try {
     const { trx_ref, ref_id, status } = req.body;
     if (status === "failed") {
-      const order = await Order.findOneAndDelete({ tx_ref: trx_ref });
+      const order = await Order.findOne({ tx_ref: trx_ref });
+      const mobiles = await Mobile.find({
+        _id: {
+          $in: [...order.products],
+        },
+      });
+
+      mobiles.forEach(async (mobile) => {
+        mobile.status = "available";
+        await mobile.save();
+      });
+
+      await order.deleteOne();
+
       return;
     }
 
@@ -113,6 +137,17 @@ const orderCallback = async (req, res) => {
     if (verify.status === "failed") return;
 
     const order = await Order.findOne({ tx_ref: trx_ref });
+    const mobiles = await Mobile.find({
+      _id: {
+        $in: [...order.products],
+      },
+    });
+
+    mobiles.forEach(async (mobile) => {
+      mobile.status = "sold";
+      await mobile.save();
+    });
+
     order.status = "paid";
     order.ref_id = ref_id;
     await order.save();

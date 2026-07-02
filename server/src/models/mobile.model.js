@@ -49,7 +49,7 @@ const mobileSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["sold", "available"],
+      enum: ["sold", "available", "pending"],
       default: "available",
     },
     pictures: {
