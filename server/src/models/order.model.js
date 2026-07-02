@@ -42,6 +42,7 @@ const orderSchema = new Schema(
       enum: ["paid", "unpaid", "delivered"],
       default: "unpaid",
     },
+    paidDate: Date,
   },
   { timestamps: true },
 );

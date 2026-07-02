@@ -1,4 +1,10 @@
 const User = require("../models/user.model");
+const {
+  overview,
+  extractSales,
+  bestSaledBrands,
+  orderStatus,
+} = require("../services/admin.service");
 
 const getUsers = async (req, res) => {
   try {
@@ -42,7 +48,38 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const dashboard = async (req, res) => {
+  try {
+    // extract total orders paid + total orders + total count of products + total customers
+    const dashboardStat = await overview();
+
+    // extract sales this month for each day, year for each month, => handle week and day sale
+    const sales = await extractSales();
+
+    // select best saled brands (by price and by count)
+    const bestBrads = await bestSaledBrands();
+
+    // orders status => total order (pending, paid, unpaid), receint orders
+    const order = await orderStatus();
+
+    res.status(200).json({
+      message: {
+        stat: dashboardStat,
+        sales,
+        bestBrads,
+        orderStat: order,
+      },
+    });
+  } catch (error) {
+    console.log("Error on dashboard controller (admin.controller) ", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
   getUsers,
   deleteUser,
+  dashboard,
 };

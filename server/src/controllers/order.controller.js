@@ -150,6 +150,7 @@ const orderCallback = async (req, res) => {
 
     order.status = "paid";
     order.ref_id = ref_id;
+    order.paidDate = Date.now();
     await order.save();
   } catch (error) {
     console.log("Error on orderCallback controller (order.controller) ", error);
