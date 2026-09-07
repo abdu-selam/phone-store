@@ -95,8 +95,8 @@ SERVER_URL=server_url(http://localhost:5000 -> for development),
 1. Clone the repository:
 
 ```Bash
-git clone https://github.com/abdu-selam/phone_store.git
-cd phone_store
+git clone https://github.com/abdu-selam/phone-store.git
+cd phone-store
 ```
 
 2. Install dependencies:
